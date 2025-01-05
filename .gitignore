@@ -1,0 +1,11 @@
+# Created by https://www.toptal.com/developers/gitignore/api/rust
+debug/
+target/
+**/*.rs.bk
+*.pdb
+
+.env
+.env.local
+.env.development
+.env.test
+.env.production
