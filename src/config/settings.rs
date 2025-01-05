@@ -123,7 +123,7 @@ pub async fn create_cache_client() -> Option<RedisClient> {
     let redis_url = Settings::from_env().cache_url;
 
     if redis_url.is_none() {
-        print!("Skipping cache setup\n");
+        println!("Skipping cache setup");
         return None;
     }
 

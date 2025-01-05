@@ -10,7 +10,6 @@ use crate::config::state::AppState;
 use super::{
     cache_repository::CacheRepository,
     model::{MetaDataResponse, PreviewParams},
-    repository::MetaDataRepository,
     service::fetch_metadata,
 };
 
@@ -20,8 +19,6 @@ pub async fn fetch_link_preview(
 ) -> Json<MetaDataResponse> {
     let url = params.url.as_str();
 
-    let repo = MetaDataRepository::new((*state.pool).clone());
-
     match &*state.cache_pool {
         Some(client) => {
             let cache_repo = CacheRepository::new(client);
@@ -29,7 +26,7 @@ pub async fn fetch_link_preview(
                 Json(metadata)
             } else {
                 let metadata = fetch_metadata(url).await.unwrap();
-                repo.insert_metadata(&metadata).await.unwrap();
+
                 cache_repo
                     .set_metadata(&metadata, Duration::from_secs(10 * 60))
                     .await
@@ -40,7 +37,6 @@ pub async fn fetch_link_preview(
         }
         None => {
             let metadata = fetch_metadata(url).await.unwrap();
-            repo.insert_metadata(&metadata).await.unwrap();
             Json(MetaDataResponse::from(metadata))
         }
     }
