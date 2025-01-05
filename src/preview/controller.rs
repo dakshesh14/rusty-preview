@@ -5,13 +5,12 @@ use axum::{
     Json,
 };
 
-use crate::config::state::AppState;
-
 use super::{
-    cache_repository::CacheRepository,
+    cache_repository::{CacheRepository, RedisRepository},
     model::{MetaDataResponse, PreviewParams},
     service::fetch_metadata,
 };
+use crate::config::state::AppState;
 
 pub async fn fetch_link_preview(
     State(state): State<Arc<AppState>>,
@@ -20,24 +19,32 @@ pub async fn fetch_link_preview(
     let url = params.url.as_str();
 
     match &*state.cache_pool {
-        Some(client) => {
-            let cache_repo = CacheRepository::new(client);
-            if let Some(metadata) = cache_repo.get_metadata(url).await {
-                Json(metadata)
-            } else {
-                let metadata = fetch_metadata(url).await.unwrap();
+        Some(cache_client) => {
+            let cache_repo = RedisRepository::builder()
+                .with_client(Arc::new(cache_client.clone()))
+                .build()
+                .expect("Failed to build cache repository");
 
-                cache_repo
-                    .set_metadata(&metadata, Duration::from_secs(10 * 60))
-                    .await
-                    .unwrap();
-
-                Json(MetaDataResponse::from(metadata))
+            if let Some(metadata) = cache_repo
+                .get_metadata(url)
+                .await
+                .expect("Failed to get metadata from cache")
+            {
+                return Json(metadata);
             }
+
+            let metadata = fetch_metadata(url).await.expect("Failed to fetch metadata");
+
+            cache_repo
+                .set_metadata(&metadata, Duration::from_secs(10 * 60))
+                .await
+                .expect("Failed to store metadata in cache");
+
+            Json(MetaDataResponse::from(&metadata))
         }
         None => {
-            let metadata = fetch_metadata(url).await.unwrap();
-            Json(MetaDataResponse::from(metadata))
+            let metadata = fetch_metadata(url).await.expect("Failed to fetch metadata");
+            Json(MetaDataResponse::from(&metadata))
         }
     }
 }

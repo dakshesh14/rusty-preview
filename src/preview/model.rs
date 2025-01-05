@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone, Debug)]
 pub struct MetaData {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -9,7 +9,7 @@ pub struct MetaData {
     pub link: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct MetaDataResponse {
     pub title: Option<String>,
     pub description: Option<String>,
@@ -28,6 +28,37 @@ impl From<MetaData> for MetaDataResponse {
     }
 }
 
+impl From<&MetaData> for MetaDataResponse {
+    fn from(metadata: &MetaData) -> Self {
+        Self {
+            title: metadata.title.clone(),
+            description: metadata.description.clone(),
+            keywords: metadata.keywords.clone(),
+            image: metadata.image.clone(),
+        }
+    }
+}
+
+impl TryFrom<MetaDataResponse> for MetaData {
+    type Error = String;
+
+    fn try_from(response: MetaDataResponse) -> Result<Self, Self::Error> {
+        Err("Cannot convert MetaDataResponse to MetaData without a link".to_string())
+    }
+}
+
+impl MetaDataResponse {
+    pub fn into_metadata(self, link: String) -> MetaData {
+        MetaData {
+            title: self.title,
+            description: self.description,
+            keywords: self.keywords,
+            image: self.image,
+            link,
+        }
+    }
+}
+
 impl Default for MetaDataResponse {
     fn default() -> Self {
         Self {
@@ -42,4 +73,16 @@ impl Default for MetaDataResponse {
 #[derive(Debug, Deserialize)]
 pub struct PreviewParams {
     pub url: String,
+}
+
+impl MetaData {
+    pub fn to_response(&self) -> MetaDataResponse {
+        self.into()
+    }
+}
+
+impl MetaDataResponse {
+    pub fn with_link(self, link: String) -> MetaData {
+        self.into_metadata(link)
+    }
 }
