@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::config::constants::Settings;
 
-use super::model::MetaData;
+use super::model::MetaDataResponse;
 
 #[derive(Error, Debug)]
 pub enum FetchError {
@@ -66,8 +66,8 @@ pub async fn fetch_with_headless_browser(url: &str) -> Result<String, FetchError
 /// * `html` - The HTML content to extract metadata from.
 ///
 /// # Returns
-/// * `MetaData` containing the extracted metadata.
-pub fn extract_metadata(html: &str) -> MetaData {
+/// * `MetaDataResponse` containing the extracted metadata.
+pub fn extract_metadata(html: &str) -> MetaDataResponse {
     let document = ScraperHTML::parse_document(html);
 
     let extract_meta_content = |property: &str| {
@@ -98,7 +98,7 @@ pub fn extract_metadata(html: &str) -> MetaData {
 
     let image = extract_meta_content("og:image");
 
-    MetaData {
+    MetaDataResponse {
         title,
         description,
         keywords,
@@ -112,9 +112,9 @@ pub fn extract_metadata(html: &str) -> MetaData {
 /// * `url` - The URL to fetch metadata from.
 ///
 /// # Returns
-/// * `Ok(MetaData)` containing the extracted metadata if successful.
+/// * `Ok(MetaDataResponse)` containing the extracted metadata if successful.
 /// * `Err(FetchError)` if an error occurs.
-pub async fn fetch_metadata(url: &str) -> Result<MetaData, FetchError> {
+pub async fn fetch_metadata(url: &str) -> Result<MetaDataResponse, FetchError> {
     let settings = Settings::from_env();
 
     if settings.use_headless_browser_only {

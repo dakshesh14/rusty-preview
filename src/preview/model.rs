@@ -6,9 +6,18 @@ pub struct MetaData {
     pub description: Option<String>,
     pub keywords: Option<String>,
     pub image: Option<String>,
+    pub link: Option<String>,
 }
 
-impl Default for MetaData {
+#[derive(Serialize)]
+pub struct MetaDataResponse {
+    pub title: Option<String>,
+    pub description: Option<String>,
+    pub keywords: Option<String>,
+    pub image: Option<String>,
+}
+
+impl Default for MetaDataResponse {
     fn default() -> Self {
         Self {
             title: None,
