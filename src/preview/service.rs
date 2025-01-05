@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use crate::config::constants::Settings;
 
-use super::model::MetaDataResponse;
+use super::model::{MetaData, MetaDataResponse};
 
 #[derive(Error, Debug)]
 pub enum FetchError {
@@ -114,19 +114,31 @@ pub fn extract_metadata(html: &str) -> MetaDataResponse {
 /// # Returns
 /// * `Ok(MetaDataResponse)` containing the extracted metadata if successful.
 /// * `Err(FetchError)` if an error occurs.
-pub async fn fetch_metadata(url: &str) -> Result<MetaDataResponse, FetchError> {
+pub async fn fetch_metadata(url: &str) -> Result<MetaData, FetchError> {
     let settings = Settings::from_env();
 
     if settings.use_headless_browser_only {
         let html = fetch_with_headless_browser(url).await?;
         let metadata = extract_metadata(&html);
-        Ok(metadata)
+        Ok(MetaData {
+            link: url.to_string(),
+            title: metadata.title,
+            description: metadata.description,
+            keywords: metadata.keywords,
+            image: metadata.image,
+        })
     } else {
         match fetch_with_request(url).await {
             Ok(html) => {
                 let metadata = extract_metadata(&html);
                 if metadata.title.is_some() && metadata.description.is_some() {
-                    return Ok(metadata);
+                    return Ok(MetaData {
+                        link: url.to_string(),
+                        title: metadata.title,
+                        description: metadata.description,
+                        keywords: metadata.keywords,
+                        image: metadata.image,
+                    });
                 }
             }
             Err(e) => eprintln!("Failed to fetch with request: {}", e),
@@ -134,6 +146,12 @@ pub async fn fetch_metadata(url: &str) -> Result<MetaDataResponse, FetchError> {
 
         let html = fetch_with_headless_browser(url).await?;
         let metadata = extract_metadata(&html);
-        Ok(metadata)
+        Ok(MetaData {
+            link: url.to_string(),
+            title: metadata.title,
+            description: metadata.description,
+            keywords: metadata.keywords,
+            image: metadata.image,
+        })
     }
 }

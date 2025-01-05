@@ -1,10 +1,10 @@
-use std::sync::Arc;
-
 use axum::Router;
-use sqlx::PgPool;
+use std::sync::Arc;
 
 use crate::preview::url::get_routes as get_preview_routes;
 
-pub fn get_routes() -> Router<Arc<PgPool>> {
+use super::state::AppState;
+
+pub fn get_routes() -> Router<Arc<AppState>> {
     Router::new().merge(get_preview_routes())
 }

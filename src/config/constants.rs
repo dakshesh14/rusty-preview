@@ -6,6 +6,7 @@ pub struct Settings {
     pub database_url: String,
     pub app_host: String,
     pub use_headless_browser_only: bool,
+    pub cache_url: Option<String>,
 }
 
 impl Settings {
@@ -18,11 +19,13 @@ impl Settings {
             .unwrap_or_else(|_| "false".to_string())
             .parse::<bool>()
             .unwrap_or(false);
+        let cache_url = env::var("CACHE_DATABASE_URL").ok();
 
         Self {
             database_url,
             app_host,
             use_headless_browser_only,
+            cache_url,
         }
     }
 }

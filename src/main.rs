@@ -8,16 +8,21 @@ async fn main() {
     let pool = config::settings::create_pool().await;
     let pool = Arc::new(pool);
 
+    let cache_pool = config::settings::create_cache_client().await;
+    let cache_pool = Arc::new(cache_pool);
+
+    let state = Arc::new(config::state::AppState { pool, cache_pool });
+
     let args: Vec<String> = env::args().collect();
 
     if args.len() > 1 {
         match args[1].as_str() {
-            "migrate" => match config::settings::apply_migrations(&pool).await {
+            "migrate" => match config::settings::apply_migrations(&state.pool).await {
                 Ok(_) => println!("Migrations successful"),
                 Err(e) => eprintln!("Migration failed: {}", e),
             },
             "server" => {
-                config::settings::run_server(pool).await;
+                config::settings::run_server(state).await;
             }
             _ => {
                 eprintln!("Invalid command provided");
@@ -25,7 +30,7 @@ async fn main() {
             }
         }
     } else {
-        config::settings::run_server(pool).await;
+        config::settings::run_server(state).await;
     }
 }
 

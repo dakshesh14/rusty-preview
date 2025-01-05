@@ -1,10 +1,11 @@
-use std::{sync::Arc, time::Instant};
-
 use axum::Router;
+use redis::Client as RedisClient;
 use sqlx::migrate::MigrateError;
 use sqlx::{postgres::PgPoolOptions, PgPool};
+use std::{sync::Arc, time::Instant};
 use thiserror::Error;
 
+use super::state::AppState;
 use super::{constants::Settings, url::get_routes};
 
 #[derive(Error, Debug)]
@@ -41,8 +42,8 @@ pub async fn create_pool() -> PgPool {
 ///
 /// # Panics
 /// This function will panic if the server cannot be started.
-pub async fn run_server(pool: Arc<PgPool>) {
-    let routes: Router = get_routes().with_state(pool);
+pub async fn run_server(state: Arc<AppState>) {
+    let routes: Router = get_routes().with_state(state);
 
     let tcp_listener = tokio::net::TcpListener::bind(Settings::from_env().app_host)
         .await
@@ -98,4 +99,33 @@ pub async fn apply_migrations(pool: &PgPool) -> Result<(), MigrationError> {
             Err(MigrationError::DatabaseError(e))
         }
     }
+}
+
+/// Creates a Redis client for caching if Redis URL is configured.
+///
+/// # Returns
+/// * `Some(RedisClient)` - If Redis URL is configured and client creation is successful
+/// * `None` - If Redis URL is not configured
+///
+/// # Panics
+/// This function will panic if Redis client creation fails with the configured URL
+///
+/// # Example
+/// ```
+/// let cache_client = create_cache_client().await;
+/// if let Some(client) = cache_client {
+///     // Use Redis client for caching
+/// } else {
+///     // Fallback to non-cached operation
+/// }
+/// ```
+pub async fn create_cache_client() -> Option<RedisClient> {
+    let redis_url = Settings::from_env().cache_url;
+
+    if redis_url.is_none() {
+        print!("Skipping cache setup\n");
+        return None;
+    }
+
+    redis_url.map(|url| redis::Client::open(url).expect("Failed to create Redis client"))
 }
