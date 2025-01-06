@@ -25,6 +25,7 @@ A rust microservice to fetch metadata of a given URL.
 
 - [x] Fully dockerize development environment
 - [x] Add redis caching
+- [ ] Filter out malicious sites
 - [ ] Fully dockerize production environment
 - [ ] Save images in S3 and serve them from there
 - [ ] API authorization?
