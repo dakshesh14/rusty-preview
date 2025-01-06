@@ -2,6 +2,8 @@
 
 A rust microservice to fetch metadata of a given URL.
 
+[rusty-preview-demo.webm](https://github.com/user-attachments/assets/5cf11531-f78a-4937-a707-4054f6e217c5)
+
 ## Installation
 
 1. Clone the repository
