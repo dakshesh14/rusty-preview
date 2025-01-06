@@ -1,4 +1,27 @@
 services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: rushy-preview--app
+    volumes:
+      - .:/usr/src/app:rw
+      - cargo-cache:/usr/local/cargo/registry:rw
+      - target-cache:/usr/src/app/target:rw
+    env_file: .env
+    environment:
+      - CHROME_BIN=/usr/bin/google-chrome
+      - CHROME_PATH=/usr/bin/google-chrome
+    security_opt:
+      - seccomp=unconfined
+    cap_add:
+      - SYS_ADMIN
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+
   postgres:
     image: postgres:latest
     container_name: rushy-preview--postgres
@@ -19,4 +42,8 @@ services:
 
 volumes:
   postgres-data:
+    driver: local
+  cargo-cache:
+    driver: local
+  target-cache:
     driver: local

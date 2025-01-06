@@ -42,12 +42,13 @@ impl From<&MetaData> for MetaDataResponse {
 impl TryFrom<MetaDataResponse> for MetaData {
     type Error = String;
 
-    fn try_from(response: MetaDataResponse) -> Result<Self, Self::Error> {
+    fn try_from(_: MetaDataResponse) -> Result<Self, Self::Error> {
         Err("Cannot convert MetaDataResponse to MetaData without a link".to_string())
     }
 }
 
 impl MetaDataResponse {
+    #[allow(dead_code)]
     pub fn into_metadata(self, link: String) -> MetaData {
         MetaData {
             title: self.title,
@@ -76,12 +77,14 @@ pub struct PreviewParams {
 }
 
 impl MetaData {
+    #[allow(dead_code)]
     pub fn to_response(&self) -> MetaDataResponse {
         self.into()
     }
 }
 
 impl MetaDataResponse {
+    #[allow(dead_code)]
     pub fn with_link(self, link: String) -> MetaData {
         self.into_metadata(link)
     }

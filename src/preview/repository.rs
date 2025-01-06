@@ -29,7 +29,9 @@ pub type Result<T> = std::result::Result<T, RepositoryError>;
 
 #[async_trait]
 pub trait MetadataRepository {
+    #[allow(dead_code)]
     async fn insert_metadata(&self, metadata: &MetaData) -> Result<()>;
+    #[allow(dead_code)]
     async fn get_metadata_by_url(&self, link: &str) -> Result<Option<MetaData>>;
 }
 
@@ -39,19 +41,23 @@ pub struct Repository {
 
 #[derive(Default)]
 pub struct RepositoryBuilder {
+    #[allow(dead_code)]
     pool: Option<Arc<PgPool>>,
 }
 
 impl RepositoryBuilder {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self::default()
     }
 
+    #[allow(dead_code)]
     pub fn with_pool(mut self, pool: Arc<PgPool>) -> Self {
         self.pool = Some(pool);
         self
     }
 
+    #[allow(dead_code)]
     pub fn build(self) -> Result<Repository> {
         let pool = self
             .pool
@@ -62,6 +68,7 @@ impl RepositoryBuilder {
 }
 
 impl Repository {
+    #[allow(dead_code)]
     pub fn builder() -> RepositoryBuilder {
         RepositoryBuilder::new()
     }

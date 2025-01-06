@@ -17,13 +17,13 @@ A rust microservice to fetch metadata of a given URL.
 1. Fetch metadata of a given URL using OpenGraph.
 2. Uses headless browser to fetch metadata for SPA websites.
 3. Blazing fast.
-4. Dockerized.
+4. Dockerized (Only for development environment)
 
 ## Future Scope
 
-- [ ] Fully dockerize both production and development environment
-- [ ] Add redis caching
-- [ ] Save the metadata in database
+- [x] Fully dockerize development environment
+- [x] Add redis caching
+- [ ] Fully dockerize production environment
 - [ ] Save images in S3 and serve them from there
 - [ ] API authorization?
 

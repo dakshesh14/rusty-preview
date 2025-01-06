@@ -1,0 +1,59 @@
+FROM rust:1.83.0-slim as development
+
+WORKDIR /usr/src/app
+
+# Install Chrome dependencies and Chrome/Chromium
+RUN apt-get update && apt-get install -y \
+    pkg-config \
+    libssl-dev \
+    curl \
+    gnupg \
+    wget \
+    # Chrome dependencies
+    fonts-liberation \
+    libasound2 \
+    libatk-bridge2.0-0 \
+    libatk1.0-0 \
+    libatspi2.0-0 \
+    libcairo2 \
+    libcups2 \
+    libdbus-1-3 \
+    libdrm2 \
+    libgbm1 \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libnspr4 \
+    libnss3 \
+    libpango-1.0-0 \
+    libx11-6 \
+    libxcb1 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxrandr2 \
+    xdg-utils \
+    # Additional dependencies that might be needed
+    libxss1 \
+    libxtst6 \
+    && rm -rf /var/lib/apt/lists/*
+
+
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google.list \
+    && apt-get update \
+    && apt-get install -y google-chrome-stable \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN useradd -m -u 1000 dev
+RUN mkdir -p /usr/local/cargo/registry /usr/src/app/target && \
+    chown -R dev:dev /usr/local/cargo /usr/src/app
+
+USER dev
+RUN cargo install cargo-watch
+
+
+ENV CHROME_BIN=/usr/bin/google-chrome
+ENV CHROME_PATH=/usr/bin/google-chrome
+
+CMD ["cargo", "watch", "-x", "run"]
